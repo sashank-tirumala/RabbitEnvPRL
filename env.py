@@ -118,11 +118,16 @@ class Humanoid(base.Task):
 
   def before_step(self, act, physics):
     """
-    Use this to convert action to motor torques and run that
+    Use this to convert action to motor torques and run that, You can run your controllers also in this step
     """
+    Kp=1.605
+    Kd = 0
+    ang = physics.torso_angle()
+    d = np.clip(np.array((1 + ((ang-0)/180.0)*Kp)*0.25),0,0.5)
+    print(f"d: {np.round(d,2)}, ang: {np.round(ang, 2)} ")
+    act =  np.array([3.5,3.5,-0.1,-0.1,d,d,0,0,0,0])
     act = action.pmtg_action(act, self.walkcon, physics)
     physics.set_control(act)
-    print(physics.joint_angles())
     pass
   def get_observation(self, physics):
     """Returns either the pure state or a set of egocentric features."""
@@ -155,9 +160,16 @@ if(__name__ == "__main__"):
     
     def constant_policy(time_step):
       return np.array([3.5,3.5,-0.1,-0.1,0.25,0.25,0,0,0,0])
+    
+    def closed_kp_kd_policy(time_step):
+      Kp=10
+      Kd = 0
+      ang = physics.torso_angle()
+      d = np.clip(np.array((1 + ((ang-0)/180.0)*Kp)*0.25),0,0.5)
+      return np.array([3.5,3.5,-0.1,-0.1,d,d,0,0,0,0])
     # physics = Physics.from_xml_path("rabbit_new.xml")
     # pixels = physics.render()
     # im = PIL.Image.fromarray(pixels)
     # im.show()
     env = run()
-    viewer.launch(env, policy=constant_policy)
+    viewer.launch(env, policy=closed_kp_kd_policy)

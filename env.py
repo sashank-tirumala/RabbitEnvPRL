@@ -24,8 +24,8 @@ import PIL.Image
 
 
 _DEFAULT_TIME_LIMIT = 25
-_CONTROL_TIMESTEP = .01 #Same as n_frame_skip in pybullet
-INIT_POS = [0,0,0.1]
+_CONTROL_TIMESTEP = .004 #Same as n_frame_skip in pybullet
+INIT_POS = [0,0,0]
 INIT_ORI= [1, 0, 0, 0]
 SUITE = containers.TaggedTasks()
 
@@ -106,6 +106,14 @@ class Humanoid(base.Task):
     Args:
       physics: An instance of `Physics`.
     """
+    qpos = physics.named.data.qpos
+    qvel = physics.named.data.qvel
+    init_pos = np.array([-0.2000, 0.7546, 0.1675, 2.4948, 0.4405, 3.1894, 0.2132])
+    init_vel = np.array([0.7743, 0.2891, 0.3796, 1.1377, -0.9273, -0.1285, 1.6298])
+    for i in range(7):
+      qpos[i] = init_pos[i]
+      qvel[i] = init_vel[i]
+    physics.after_reset()
     super().initialize_episode(physics)
 
   def before_step(self, act, physics):
@@ -114,6 +122,7 @@ class Humanoid(base.Task):
     """
     act = action.pmtg_action(act, self.walkcon, physics)
     physics.set_control(act)
+    print(physics.joint_angles())
     pass
   def get_observation(self, physics):
     """Returns either the pure state or a set of egocentric features."""
@@ -145,7 +154,7 @@ if(__name__ == "__main__"):
         return vals
     
     def constant_policy(time_step):
-      return np.array([2.5,2.5,-0.1,-0.1,0.25,0.25,0,0,0,0])
+      return np.array([3.5,3.5,-0.1,-0.1,0.25,0.25,0,0,0,0])
     # physics = Physics.from_xml_path("rabbit_new.xml")
     # pixels = physics.render()
     # im = PIL.Image.fromarray(pixels)

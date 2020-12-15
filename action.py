@@ -24,6 +24,7 @@ def pmtg_action(action, walkcon, physics):
     m_angle_cmd_ext = np.array(leg_m_angle_cmd)
     m_vel_cmd_ext = np.zeros(4)
     applied_motor_torque = apply_pd_control(m_angle_cmd_ext, m_vel_cmd_ext, qpos, qvel, kp=kp,kd=kd)
+    applied_motor_torque = np.clip(applied_motor_torque, -60, 60)
     return applied_motor_torque
 
 if(__name__ == "__main__"):

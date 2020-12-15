@@ -109,12 +109,20 @@ class Humanoid(base.Task):
   def get_observation(self, physics):
     """Returns either the pure state or a set of egocentric features."""
     obs = state.obs1(physics)
-    print(physics.contact_points_and_force())
+    # print(physics.contact_points_and_force())
     return obs
 
   def get_reward(self, physics):
     """Returns a reward to the agent."""
     return 1
+  
+  def get_termination(self, physics):
+    print(physics.torso_angle())
+    if(physics.torso_angle() > 90 or physics.torso_angle() < -90):
+      print("in termination")
+      return -10
+    return None
+  
 
 
 if(__name__ == "__main__"):

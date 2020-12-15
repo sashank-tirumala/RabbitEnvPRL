@@ -71,6 +71,14 @@ class Physics(mujoco.Physics):
       """ Returns the velocity of the joints. The order of data is again Right Thigh, Right Knee, Left Thigh, Left Knee"""
       return self.data.qvel[3:].copy()
     # return Quaternion(np.array(self.named.data.find('body', 'rabbit/torso').quat.copy())).degrees
+  
+  def contact_points_and_force(self):
+    """
+    The order is right-leg position, right-leg force, left-leg position, left-leg force
+    """
+    pos_r = self.named.data.site_xpos['rabbit/t1'].copy() - self.named.data.subtree_com['rabbit/torso'].copy()
+    pos_l = self.named.data.site_xpos['rabbit/t2'].copy() - self.named.data.subtree_com['rabbit/torso'].copy()
+    return np.concatenate([pos_r,physics.named.data.sensordata['rabbit/s_t1'], pos_l, physics.named.data.sensordata['rabbit/s_t2']])
 
 
 class Humanoid(base.Task):
@@ -101,7 +109,7 @@ class Humanoid(base.Task):
   def get_observation(self, physics):
     """Returns either the pure state or a set of egocentric features."""
     obs = state.obs1(physics)
-    print(obs)
+    print(physics.contact_points_and_force())
     return obs
 
   def get_reward(self, physics):

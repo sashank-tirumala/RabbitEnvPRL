@@ -24,7 +24,7 @@
           <inertial pos="0 0 -0.36" mass="3.2" diaginertia="0.2 0.2 0.02" />
           <joint axis="0 1 0" name="leg_joint" pos="0 0 0.2" range="0 150" type="hinge"/>
           <geom friction="2" fromto="0 0 0.2 0 0 -0.18" name="leg_geom" size="0.04" type="capsule"/>
-          <site name='t1' pos='0 0 -0.36' type='box' group='4' size='.04 .04 .06'/>      
+          <site name='t1' pos='0 0 -0.16' type='box' group='4' size='.04 .04 .06'/>      
         </body>
       </body>
       <!-- copied and then replace thigh->thigh_left, leg->leg_left, foot->foot_right -->
@@ -36,7 +36,7 @@
           <inertial pos="0 0 -0.36" mass="3.2" diaginertia="0.2 0.2 0.02" />
           <joint axis="0 1 0" name="leg_left_joint" pos="0 0 0.2" range="0 150" type="hinge"/>
           <geom friction="2" fromto="0 0 0.2 0 0 -0.18" name="leg_left_geom" rgba=".7 .3 .6 1" size="0.04" type="capsule"/>
-          <site name='t2' pos='0 0 -0.36' type='box' group='4' size='.04 .04 .06'/>
+          <site name='t2' pos='0 0 -0.16' type='box' group='4' size='.04 .04 .06'/>
         </body>
       </body>
     </body>

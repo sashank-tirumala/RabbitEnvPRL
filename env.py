@@ -16,14 +16,16 @@ from pyquaternion import Quaternion
 import world
 import robot
 import state
+import action
+import pmtg_controller
 
 import numpy as np
 import PIL.Image
 
 
 _DEFAULT_TIME_LIMIT = 25
-_CONTROL_TIMESTEP = .02 #Same as n_frame_skip in pybullet
-INIT_POS = [0,0,0.05]
+_CONTROL_TIMESTEP = .01 #Same as n_frame_skip in pybullet
+INIT_POS = [0,0,0.1]
 INIT_ORI= [1, 0, 0, 0]
 SUITE = containers.TaggedTasks()
 
@@ -84,7 +86,7 @@ class Physics(mujoco.Physics):
 class Humanoid(base.Task):
   """A humanoid task."""
 
-  def __init__(self, random=None):
+  def __init__(self, random=None, controller = ['PMTG_CONTROLLER'] ):
     """Initializes an instance of `Humanoid`.
     Args:
       move_speed: A float. If this value is zero, reward is given simply for
@@ -97,19 +99,25 @@ class Humanoid(base.Task):
         automatically (default).
     """
     super().__init__(random=random)
+    self.walkcon = pmtg_controller.WalkingController([0, np.pi])
 
   def initialize_episode(self, physics):
     """Sets the state of the environment at the start of each episode.
     Args:
       physics: An instance of `Physics`.
     """
-    # Find a collision-free random initial configuration.
     super().initialize_episode(physics)
 
+  def before_step(self, act, physics):
+    """
+    Use this to convert action to motor torques and run that
+    """
+    act = action.pmtg_action(act, self.walkcon, physics)
+    physics.set_control(act)
+    pass
   def get_observation(self, physics):
     """Returns either the pure state or a set of egocentric features."""
     obs = state.obs1(physics)
-    # print(physics.contact_points_and_force())
     return obs
 
   def get_reward(self, physics):
@@ -117,10 +125,13 @@ class Humanoid(base.Task):
     return 1
   
   def get_termination(self, physics):
-    print(physics.torso_angle())
-    if(physics.torso_angle() > 90 or physics.torso_angle() < -90):
-      print("in termination")
-      return -10
+    """
+    Condition to end the environment
+    """
+    # # print(physics.torso_angle())
+    # if(physics.torso_angle() > 90 or physics.torso_angle() < -90):
+    #   # print("in termination")
+    #   return -10
     return None
   
 
@@ -132,9 +143,12 @@ if(__name__ == "__main__"):
                            high=20,
                            size=4)
         return vals
+    
+    def constant_policy(time_step):
+      return np.array([2.5,2.5,-0.1,-0.1,0.25,0.25,0,0,0,0])
     # physics = Physics.from_xml_path("rabbit_new.xml")
     # pixels = physics.render()
     # im = PIL.Image.fromarray(pixels)
     # im.show()
     env = run()
-    viewer.launch(env, policy=random_policy)
+    viewer.launch(env, policy=constant_policy)
